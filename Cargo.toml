@@ -61,7 +61,7 @@ windows-sys = { version = "0.59", features = [
     "Win32_UI_WindowsAndMessaging",
     "Win32_System_LibraryLoader",
 ] }
-wintun-bindings = { version = "^0.7.7", features = [
+wintun-bindings = { path = "crates/wintun-bindings", features = [
     "panic_on_unsent_packets",
     "verify_binary_signature",
     "async",
