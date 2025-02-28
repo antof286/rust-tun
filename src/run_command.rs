@@ -1,10 +1,19 @@
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
 /// Runs a command and returns an error if the command fails, just convenience for users.
 #[doc(hidden)]
 #[allow(dead_code)]
 pub fn run_command(command: &str, args: &[&str]) -> std::io::Result<Vec<u8>> {
+    const CREATE_NO_WINDOW: u32 = 0x08000000;
+
     let full_cmd = format!("{} {}", command, args.join(" "));
     log::debug!("Running command: \"{full_cmd}\"...");
-    let out = match std::process::Command::new(command).args(args).output() {
+    let mut cmd = std::process::Command::new(command);
+    cmd.args(args);
+    #[cfg(target_os = "windows")]
+    cmd.creation_flags(CREATE_NO_WINDOW);
+
+    let out = match cmd.output() {
         Ok(out) => out,
         Err(e) => {
             log::error!("Run command: \"{full_cmd}\" failed with: {e}");

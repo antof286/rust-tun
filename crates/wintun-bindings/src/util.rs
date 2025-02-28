@@ -1,5 +1,6 @@
 use crate::Error;
 use std::net::{IpAddr, Ipv6Addr, SocketAddr};
+use std::os::windows::process::CommandExt;
 use windows_sys::{
     core::GUID,
     Win32::{
@@ -488,10 +489,12 @@ pub fn set_adapter_mtu_api(name: &str, mtu: usize) -> std::io::Result<()> {
 }
 
 /// Runs a command and returns an error if the command fails, just convenience for users.
+#[doc(hidden)]
 pub fn run_command(command: &str, args: &[&str]) -> std::io::Result<Vec<u8>> {
+    const CREATE_NO_WINDOW: u32 = 0x08000000;
     let full_cmd = format!("{} {}", command, args.join(" "));
     log::debug!("Running command: \"{full_cmd}\"...");
-    let out = match std::process::Command::new(command).args(args).output() {
+    let out = match std::process::Command::new(command).args(args).creation_flags(CREATE_NO_WINDOW).output() {
         Ok(out) => out,
         Err(e) => {
             let e2 = e.to_string().trim().to_string();
